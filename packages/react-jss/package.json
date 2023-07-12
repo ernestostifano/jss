@@ -37,7 +37,7 @@
     "check-snapshot": "node ../../scripts/match-snapshot.js"
   },
   "peerDependencies": {
-    "react": ">=16.8.6"
+    "react": ">=18.2.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.1",
@@ -53,8 +53,9 @@
     "tiny-warning": "^1.0.2"
   },
   "devDependencies": {
-    "@types/react": "^16.8.16",
-    "react-dom": "^16.8.6",
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "styled-system": "4.2.0-0"
   }
 }

@@ -91,6 +91,7 @@ export const updateDynamicRules = (data, sheet, rules) => {
   }
 }
 
+// FIXME: DURING STRICT MODE DOUBLE RENDER THIS FUNCTION IS ADDING DYNAMIC RULES THAT ALREADY EXIST AND IS ALSO RETURNING AN OBJECT WITH THE RULES ADDED DURING SECOND RENDER, SO RULES ADDED DURING FIRST RENDER ARE NEVER REMOVED
 export const addDynamicRules = (sheet, data) => {
   const meta = getMeta(sheet)
 

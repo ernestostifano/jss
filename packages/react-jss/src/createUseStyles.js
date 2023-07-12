@@ -21,6 +21,41 @@ function getUseInsertionEffect(isSSR) {
 
 const noTheme = {}
 
+/*
+ * *** NOTE ABOUT STRICT MODE AND REACT 18+ ***
+ *
+ * IN REACT 18+, WITH STRICT MODE ENABLED, HOOKS WILL NOT BEHAVE AS EXPECTED
+ * THE OBJECTIVE IS TO AVOID INVOKING SIDE EFFECTS (INCLUDING MUTATIONS) DURING
+ * RENDERING.
+ *
+ * https://react.dev/reference/react/StrictMode
+ * https://react.dev/reference/react/StrictMode#fixing-bugs-found-by-double-rendering-in-development
+ * https://react.dev/learn/keeping-components-pure
+ * https://legacy.reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects
+ *
+ * IN PARTICULAR:
+ *
+ * - useRef VALUE WILL BE RESET TO THE PREVIOUS VALUE BEFORE THE SECOND RENDER.
+ *
+ * - useId WILL RETURN A DIFFERENT ID ON SECOND RENDER
+ *
+ * - useMemo WILL ALWAYS BE TRIGGERED TWICE DURING DOUBLE RENDER (IT IS MEANT ONLY FOR OPTIMISATION
+ *   PURPOSES AND IT HAS BEEN DOCUMENTED TO NOT RELY ON THE FACT THAT IT WILL ALWAYS RESPECT DEPS).
+ *
+ * - useInsertionEffect WILL BE TRIGGERED ONLY ONCE, ON SECOND RENDER AND CLEANUP WILL NOT BE CALLED.
+ *
+ * - useEffect/useLayoutEffect WILL BE TRIGGERED TWICE, BUT ON SECOND RENDER ONLY (CLEANUP WILL BE CALLED ONCE BETWEEN TRIGGERS).
+ *
+ * ALL CONSIDERED, IT HAS BEEN PURPOSELY MADE IMPOSSIBLE TO TRIGGER SIDE EFFECTS
+ * OUTSIDE THE EFFECT HOOKS WITH PROPER CLEANUP LOGIC. UNFORTUNATELY, DYNAMIC STYLES
+ * ADDITION, WITH RESPECTIVE KEYS GENERATION IS A SIDE EFFECT.
+ *
+ * DEVELOPING WITHOUT STRICT MODE WOULD BE A BIG MISTAKE IN REACT 18+.
+ *
+ * ADJUSTING react-jss TO WORK PROPERLY AS PER REACT GUIDELINES, THUS BEHAVING
+ * AS EXPECTED IN STRICT MODE COULD REQUIRE AN IMPORTANT REFACTOR OF JSS IN GENERAL.
+ */
+
 const createUseStyles = (styles, options = {}) => {
   const {index = getSheetIndex(), theming, name, ...sheetOptions} = options
   const ThemeContext = (theming && theming.context) || DefaultThemeContext
@@ -95,10 +130,10 @@ const createUseStyles = (styles, options = {}) => {
           }
         }
       }
-    }, [sheet])
+    }, [sheet]) // TODO: ADD dynamicRules?
 
     const classes = useMemo(
-      () => (sheet && dynamicRules ? getSheetClasses(sheet, dynamicRules) : emptyObject),
+      () => (sheet && dynamicRules ? getSheetClasses(sheet, dynamicRules) : emptyObject), // TODO: REMOVE dynamicRules FROM CHECK?
       [sheet, dynamicRules]
     )
 
