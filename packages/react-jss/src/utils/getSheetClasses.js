@@ -1,7 +1,7 @@
 import {getMeta} from './sheetsMeta'
 
-const getSheetClasses = (sheet, dynamicRules) => {
-  if (!dynamicRules) {
+const getSheetClasses = (sheet, dynamicRulesClassNames) => {
+  if (!dynamicRulesClassNames) {
     return sheet.classes
   }
 
@@ -12,11 +12,18 @@ const getSheetClasses = (sheet, dynamicRules) => {
   }
 
   const classes = {}
+
   for (const key in meta.styles) {
     classes[key] = sheet.classes[key]
 
-    if (key in dynamicRules) {
-      classes[key] += ` ${sheet.classes[dynamicRules[key].key]}`
+    if (key in dynamicRulesClassNames) {
+      const k = dynamicRulesClassNames[key].key
+
+      if (sheet.classes[k]) {
+        classes[key] += ` ${sheet.classes[k]}`
+      } else {
+        classes[key] += ` ${dynamicRulesClassNames[key].id}`
+      }
     }
   }
 

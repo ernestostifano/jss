@@ -91,11 +91,10 @@ export const updateDynamicRules = (data, sheet, rules) => {
   }
 }
 
-// FIXME: DURING STRICT MODE DOUBLE RENDER THIS FUNCTION IS ADDING DYNAMIC RULES THAT ALREADY EXIST AND IS ALSO RETURNING AN OBJECT WITH THE RULES ADDED DURING SECOND RENDER, SO RULES ADDED DURING FIRST RENDER ARE NEVER REMOVED
-export const addDynamicRules = (sheet, data) => {
+export const addDynamicRules = (sheet, data, classNames) => {
   const meta = getMeta(sheet)
 
-  if (!meta) {
+  if (!meta || !classNames) {
     return undefined
   }
 
@@ -104,7 +103,9 @@ export const addDynamicRules = (sheet, data) => {
   // Loop over each dynamic rule and add it to the stylesheet
   for (const key in meta.dynamicStyles) {
     const initialRuleCount = sheet.rules.index.length
-    const originalRule = sheet.addRule(key, meta.dynamicStyles[key])
+    const originalRule = sheet.addRule(classNames[key].key, meta.dynamicStyles[key], {
+      overrideRuleId: classNames[key].id
+    })
 
     // Loop through all created rules, fixes updating dynamic rules
     for (let i = initialRuleCount; i < sheet.rules.index.length; i++) {
@@ -118,4 +119,25 @@ export const addDynamicRules = (sheet, data) => {
   }
 
   return rules
+}
+
+export const getDynamicRulesClassNames = (sheet, context) => {
+  const meta = getMeta(sheet)
+
+  if (!meta) {
+    return undefined
+  }
+
+  const classNames = {}
+
+  for (const key in meta.dynamicStyles) {
+    const k = `${key}-d${sheet.rules.counter++}`
+
+    classNames[key] = {
+      key: k,
+      id: (sheet.options.generateId || context.generateId)({key: k}, sheet)
+    }
+  }
+
+  return classNames
 }

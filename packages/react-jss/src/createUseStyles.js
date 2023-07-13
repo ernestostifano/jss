@@ -6,7 +6,8 @@ import {
   createStyleSheet,
   addDynamicRules,
   updateDynamicRules,
-  removeDynamicRules
+  removeDynamicRules,
+  getDynamicRulesClassNames
 } from './utils/sheets'
 import getSheetIndex from './utils/getSheetIndex'
 import {manageSheet, unmanageSheet} from './utils/managers'
@@ -75,7 +76,9 @@ const createUseStyles = (styles, options = {}) => {
     const context = useContext(JssContext)
     const theme = useTheme(data && data.theme)
 
-    const [sheet, dynamicRules] = useMemo(() => {
+    const dynamicRulesRef = useRef(null)
+
+    const sheet = useMemo(() => {
       const newSheet = createStyleSheet({
         context,
         styles,
@@ -95,13 +98,35 @@ const createUseStyles = (styles, options = {}) => {
         })
       }
 
-      return [newSheet, newSheet ? addDynamicRules(newSheet, data) : null]
+      return newSheet
     }, [context, theme])
+
+    const dynamicRulesClassNames = useMemo(
+      () => getDynamicRulesClassNames(sheet, context),
+      [sheet, context]
+    )
+
+    getUseInsertionEffect(context.isSSR)(() => {
+      let dynamicRules = null
+
+      if (sheet) {
+        dynamicRules = addDynamicRules(sheet, data, dynamicRulesClassNames)
+      }
+
+      dynamicRulesRef.current = dynamicRules
+
+      return () => {
+        if (dynamicRules) {
+          removeDynamicRules(sheet, dynamicRules)
+          dynamicRulesRef.current = null
+        }
+      }
+    }, [sheet])
 
     getUseInsertionEffect(context.isSSR)(() => {
       // We only need to update the rules on a subsequent update and not in the first mount
-      if (sheet && dynamicRules && !isFirstMount.current) {
-        updateDynamicRules(data, sheet, dynamicRules)
+      if (sheet && dynamicRulesRef.current && !isFirstMount.current) {
+        updateDynamicRules(data, sheet, dynamicRulesRef.current)
       }
     }, [data])
 
@@ -123,18 +148,17 @@ const createUseStyles = (styles, options = {}) => {
             sheet,
             theme
           })
-
-          // when sheet changes, remove related dynamic rules
-          if (dynamicRules) {
-            removeDynamicRules(sheet, dynamicRules)
-          }
         }
       }
-    }, [sheet]) // TODO: ADD dynamicRules?
+    }, [sheet])
 
     const classes = useMemo(
-      () => (sheet && dynamicRules ? getSheetClasses(sheet, dynamicRules) : emptyObject), // TODO: REMOVE dynamicRules FROM CHECK?
-      [sheet, dynamicRules]
+      () =>
+        // TODO: REMOVE dynamicRulesClassNames FROM CHECK?
+        sheet && dynamicRulesClassNames
+          ? getSheetClasses(sheet, dynamicRulesClassNames)
+          : emptyObject,
+      [sheet, dynamicRulesClassNames]
     )
 
     useDebugValue(classes)
@@ -143,7 +167,7 @@ const createUseStyles = (styles, options = {}) => {
 
     useEffect(() => {
       isFirstMount.current = false
-    })
+    }, [])
 
     return classes
   }

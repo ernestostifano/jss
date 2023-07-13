@@ -67,7 +67,7 @@ export class StyleRule extends BaseStyleRule {
     if (selector) {
       this.selectorText = selector
     } else if (scoped !== false) {
-      this.id = generateId(this, sheet)
+      this.id = options.overrideRuleId || generateId(this, sheet)
       this.selectorText = `.${escape(this.id)}`
     }
   }

@@ -120,7 +120,8 @@ export type RuleOptions = {
   jss: Jss,
   generateId: GenerateId,
   Renderer?: Class<Renderer> | null,
-  name?: string
+  name?: string,
+  overrideRuleId?: string
 }
 
 export type RuleListOptions = {

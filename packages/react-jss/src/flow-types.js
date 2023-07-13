@@ -68,3 +68,5 @@ export type ThemedStyles<Theme, Data = {}> = (theme: Theme) => {
 }
 
 export type Styles<Theme> = StaticStyles | ThemedStyles<Theme>
+
+export type DynamicRulesClassNames = {[string]: {key: string, id: string}}

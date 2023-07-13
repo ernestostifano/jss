@@ -1,7 +1,7 @@
 ﻿// @flow
 import {type StyleSheetFactoryOptions} from 'jss'
 import type {StyleSheet} from 'jss'
-import type {Context, DynamicRules, Styles} from '../flow-types'
+import type {Context, DynamicRules, Styles, DynamicRulesClassNames} from '../flow-types'
 
 type Options<Theme> = {
   context: Context,
@@ -18,4 +18,13 @@ declare export function removeDynamicRules(sheet: StyleSheet, rules: DynamicRule
 
 declare export function updateDynamicRules(data: any, sheet: StyleSheet, rules: DynamicRules): void
 
-declare export function addDynamicRules(sheet: StyleSheet, data: any): DynamicRules | void
+declare export function addDynamicRules(
+  sheet: StyleSheet,
+  data: any,
+  classNames: DynamicRulesClassNames
+): DynamicRules | void
+
+declare export function getDynamicRulesClassNames(
+  sheet: StyleSheet,
+  context: Context
+): DynamicRulesClassNames | void

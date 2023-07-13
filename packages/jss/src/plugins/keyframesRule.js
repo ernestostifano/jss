@@ -31,7 +31,7 @@ export class KeyframesRule {
     this.key = `${this.type}-${this.name}`
     this.options = options
     const {scoped, sheet, generateId} = options
-    this.id = scoped === false ? this.name : escape(generateId(this, sheet))
+    this.id = scoped === false ? this.name : escape(options.overrideRuleId || generateId(this, sheet))
     this.rules = new RuleList({...options, parent: this})
 
     for (const name in frames) {
